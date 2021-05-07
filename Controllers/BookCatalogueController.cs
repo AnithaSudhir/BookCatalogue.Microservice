@@ -73,7 +73,7 @@ namespace BookCatalogue.Microservice.Controllers
                            .Where(c => c.ISBN == isbn)
                            .Include(u => u.Authors)
                            .FirstOrDefault();
-
+                
             }
             catch (Exception e)
             {
@@ -107,7 +107,7 @@ namespace BookCatalogue.Microservice.Controllers
                 }
                 else
                 {
-                    return BadRequest("ISBN not found");
+                    return NotFound();
                 }
             }
             catch (Exception e)
@@ -143,6 +143,10 @@ namespace BookCatalogue.Microservice.Controllers
                     MessageSender sender = new MessageSender();
                     sender.SendMQ("Book Updated");
 
+                }
+                else
+                {
+                    return NotFound();
                 }
             }
             catch (Exception e)
