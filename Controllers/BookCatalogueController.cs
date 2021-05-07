@@ -18,18 +18,18 @@ namespace BookCatalogue.Microservice.Controllers
     {
         public IBookCatalogueContext BookCatalogueContext;
 
-    public BookCatalogueController(IBookCatalogueContext context)
-     {
-        BookCatalogueContext = context;
-     }
-       
+        public BookCatalogueController(IBookCatalogueContext context)
+        {
+            BookCatalogueContext = context;
+        }
+
 
         [HttpPost]
-         public async Task<IActionResult> Create(Book book)
-        {              
-            if(book!=null )
+        public async Task<IActionResult> Create(Book book)
+        {
+            try
             {
-                if(book.ISBN != null)
+                if (book != null && book.ISBN != null)
                 {
                     var valid = BookCatalogueValidations.IsValid(book.ISBN);
                     if (!valid) return BadRequest("Invalid ISBN format");
@@ -39,89 +39,118 @@ namespace BookCatalogue.Microservice.Controllers
                                     .Include(u => u.Authors)
                                     .FirstOrDefault();
 
-                    if (bookitem!=null) return BadRequest("Record already exists");
-                }           
+                    if (bookitem != null) return BadRequest("Record already exists");
 
+
+                    BookCatalogueContext.Books.Add(book);
+                    await BookCatalogueContext.SaveChanges();
+                    MessageSender sender = new MessageSender();
+                    sender.SendMQ("Book Added");
+                }
             }
-
-            BookCatalogueContext.Books.Add(book);           
-            await BookCatalogueContext.SaveChanges();
-            MessageSender sender = new MessageSender();
-            sender.SendMQ("Book Added");
-
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
             return Ok(book.Id);
-                        
+
         }
 
-        [HttpGet(Name = "GetAllBooks")]   
+        [HttpGet(Name = "GetAllBooks")]
         public IEnumerable<Book> Get()
         {
-            var books = BookCatalogueContext.Books
-             .Include(u => u.Authors);
-            return books;
+            return BookCatalogueContext.Books
+            .Include(u => u.Authors).AsQueryable<Book>();
         }
 
         [HttpGet("ISBN", Name = "GetByISBN")]
         public ActionResult<Book> Get(string isbn)
-        {   
-            var book = BookCatalogueContext.Books
-            .Where(c => c.ISBN == isbn)
-            .Include(u => u.Authors)
-            .FirstOrDefault();
+        {
+            Book book = new Book();
+            try
+            {
+                book = BookCatalogueContext.Books
+                           .Where(c => c.ISBN == isbn)
+                           .Include(u => u.Authors)
+                           .FirstOrDefault();
 
-            if (book == null) return NotFound();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
 
             return Ok(book);
         }
 
-        [HttpDelete("ISBN")] 
+        [HttpDelete("ISBN")]
         public async Task<IActionResult> Delete(string isbn)
         {
-            var book = BookCatalogueContext.Books.ToList()
-           .Where(c => c.ISBN==isbn)
-           .FirstOrDefault();
-            if (book == null) return NotFound();
+            Book book = new Book();
+            try
+            {
+                book = BookCatalogueContext.Books.ToList()
+                        .Where(c => c.ISBN == isbn)
+                        .FirstOrDefault();
 
-            var authors = BookCatalogueContext.Authors.ToList()
-           .Where(c => c.BookId == book.Id);
-           
-            BookCatalogueContext.Authors.RemoveRange(authors);
-            BookCatalogueContext.Books.Remove(book);
+                if (book != null)
+                {
+                    var authors = BookCatalogueContext.Authors.ToList()
+                   .Where(c => c.BookId == book.Id);
 
-            await BookCatalogueContext.SaveChanges();
-            MessageSender sender = new MessageSender();
-            sender.SendMQ("Book Deleted");
+                    BookCatalogueContext.Authors.RemoveRange(authors);
+                    BookCatalogueContext.Books.Remove(book);
+
+                    await BookCatalogueContext.SaveChanges();
+                    MessageSender sender = new MessageSender();
+                    sender.SendMQ("Book Deleted");
+                }
+                else
+                {
+                    return BadRequest("ISBN not found");
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
 
             return Ok();
         }
 
         [HttpPut("ISBN")]
         public async Task<IActionResult> Update(string isbn, Entities.Book book)
-        {           
-            var bookItem = BookCatalogueContext.Books.Where(a => a.ISBN.Replace("-","") == isbn.Replace("-","")).FirstOrDefault();
-
-            if (bookItem == null) return NotFound();
-            else
+        {
+            try
             {
-                var bookitem = BookCatalogueContext.Books
-                                      .Where(c => c.ISBN == book.ISBN)
-                                      .Include(u => u.Authors)
-                                      .FirstOrDefault();
+                var bookItem = BookCatalogueContext.Books.Where(a => a.ISBN.Replace("-", "") == isbn.Replace("-", "")).FirstOrDefault();
 
-                if (bookitem != null) return BadRequest("Record already exists");
+                if (bookItem != null)
+                {
+                    var bookitem = BookCatalogueContext.Books
+                                          .Where(c => c.ISBN == book.ISBN)
+                                          .Include(u => u.Authors)
+                                          .FirstOrDefault();
 
-                bookItem.Title = book.Title;
-                bookItem.ISBN = book.ISBN;
-                bookItem.Authors = new List<Author>();
-                bookItem.Authors.AddRange(book.Authors);
+                    if (bookitem != null) return BadRequest("Record already exists");
 
-                await BookCatalogueContext.SaveChanges();
-                MessageSender sender = new MessageSender();
-                sender.SendMQ("Book Updated");
+                    bookItem.Title = book.Title;
+                    bookItem.ISBN = book.ISBN;
+                    bookItem.Authors = new List<Author>();
+                    bookItem.Authors.AddRange(book.Authors);
 
-                return Ok();
+                    await BookCatalogueContext.SaveChanges();
+                    MessageSender sender = new MessageSender();
+                    sender.SendMQ("Book Updated");
+
+                }
             }
-           
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            return Ok();
+
         }
 
     }

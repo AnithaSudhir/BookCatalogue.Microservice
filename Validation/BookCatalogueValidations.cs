@@ -8,6 +8,7 @@ namespace BookCatalogue.Microservice.Validation
         {
             SetIsbn(isbn);
         }
+
         private string _isbn10 = "";
         private string _isbn13 = "";
         public string ISBN10
