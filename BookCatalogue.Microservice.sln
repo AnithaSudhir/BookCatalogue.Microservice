@@ -5,7 +5,10 @@ VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookCatalogue.Microservice", "BookCatalogue.Microservice.csproj", "{150B2CE3-C26E-482C-8843-0FA4C8D8B4E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookCatalogue.Microservice.UnitTest", "..\BookCatalogue.Microservice.UnitTest\BookCatalogue.Microservice.UnitTest.csproj", "{2AF126AC-A9C4-4442-A4CF-B3825BEFEF25}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookCatalogue.UnitTest", "BookCatalogue.UnitTest\BookCatalogue.UnitTest.csproj", "{426C1D8A-BAF7-450A-A58D-B501BA30E59E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{150B2CE3-C26E-482C-8843-0FA4C8D8B4E6} = {150B2CE3-C26E-482C-8843-0FA4C8D8B4E6}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +20,10 @@ Global
 		{150B2CE3-C26E-482C-8843-0FA4C8D8B4E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{150B2CE3-C26E-482C-8843-0FA4C8D8B4E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{150B2CE3-C26E-482C-8843-0FA4C8D8B4E6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2AF126AC-A9C4-4442-A4CF-B3825BEFEF25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2AF126AC-A9C4-4442-A4CF-B3825BEFEF25}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2AF126AC-A9C4-4442-A4CF-B3825BEFEF25}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2AF126AC-A9C4-4442-A4CF-B3825BEFEF25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{426C1D8A-BAF7-450A-A58D-B501BA30E59E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{426C1D8A-BAF7-450A-A58D-B501BA30E59E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{426C1D8A-BAF7-450A-A58D-B501BA30E59E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{426C1D8A-BAF7-450A-A58D-B501BA30E59E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
